@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Catálogo - AnimeVision</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>AnimeVision</h1>
+      <div class="user-area">
+        <span>Olá, <strong>{{ usuario }}</strong></span>
+        <a class="btn small" href="{{ url_for('logout') }}">Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for cat, msg in messages %}
+            <li class="flash {{ cat }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <section class="card add-card">
+      <h2>Adicionar Anime</h2>
+      <form class="grid-form" action="{{ url_for('add') }}" method="post">
+        <label>Autor
+          <input name="autor" type="text" required>
+        </label>
+        <label>Nome
+          <input name="nome" type="text" required>
+        </label>
+        <label>Temporada
+          <input name="temporada" type="number" min="1" value="1">
+        </label>
+        <label>Gênero
+          <select name="genero">
+            <option>Anime</option>
+            <option>Filme</option>
+            <option>Série</option>
+          </select>
+        </label>
+        <label>Classificação
+          <input name="classificacao" type="number" min="0" max="21" value="0">
+        </label>
+        <label>Idioma
+          <input name="idioma" type="text" value="Português">
+        </label>
+        <label>Avaliação
+          <input name="avaliacao" type="number" min="0" max="10" step="0.1" value="0">
+        </label>
+        <label>Episódio
+          <input name="episodio" type="number" min="1" value="1">
+        </label>
+        <label>Duração (min)
+          <input name="duracao" type="number" min="0" value="24">
+        </label>
+
+        <div class="form-actions">
+          <button class="btn primary" type="submit">Adicionar</button>
+          <a class="btn" href="{{ url_for('index') }}">Limpar</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="card list-card">
+      <h2>Catálogo ({{ animes|length }})</h2>
+      {% if animes %}
+        <table class="catalog">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Título</th>
+              <th>Descrição</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for anime in animes %}
+              <tr class="{% if anime.classificacao_alta() %}danger{% endif %}">
+                <td>{{ loop.index0 }}</td>
+                <td>{{ anime.nome }}</td>
+                <td class="descricao">{{ anime.descricao() }}</td>
+                <td class="actions-col">
+                  <form method="post" action="{{ url_for('remove', index=loop.index0) }}" onsubmit="return confirm('Remover este item?');">
+                    <button class="btn danger small" type="submit">Remover</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>Não há itens cadastrados.</p>
+      {% endif %}
+    </section>
+
+    <section class="card alert-card">
+      <h2>Classificação Alta (>= 18)</h2>
+      {% if altos %}
+        <ul>
+          {% for a in altos %}
+            <li>{{ a.nome }} — classificação {{ a.classificacao }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>Sem alertas no momento.</p>
+      {% endif %}
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>AnimeVision — protótipo • Feito com Flask</p>
+    </div>
+  </footer>
+</body>
+</html>
